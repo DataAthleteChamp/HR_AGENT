@@ -1,0 +1,60 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# PyCharm project files
+.idea/
+
+# VSCode project files (optional, just in case)
+.vscode/
+
+# Environment variables
+.env
+*.env
+
+# Log files and temp files
+*.log
+*.tmp
+*.bak
+*.swp
+
+# macOS system files
+.DS_Store
+
+# Jupyter Notebook checkpoints (if ever added)
+.ipynb_checkpoints/
+
+# Compiled model or data artifacts (optional)
+*.pt
+*.pth
+*.model
+*.h5
+
+# Streamlit config cache
+.streamlit/
+
+# pytest cache
+.pytest_cache/
+
+# PEP 582 local packages
+__pypackages__/
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+
+# MyPy, Pyright, or other tooling
+.mypy_cache/
+.pyright/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
