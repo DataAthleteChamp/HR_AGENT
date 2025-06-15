@@ -5,13 +5,11 @@ import ai_nlp
 
 
 def show_doctor_ui(doctor_name: str):
-    """Display the Doctor interface for generating and managing reports."""
     st.header("Doctor Dashboard")
     st.subheader(f"Logged in as: {doctor_name}")
 
     patient_name = st.selectbox("Select Patient", data.PATIENTS, key="doctor_selected_patient")
 
-    # === Report Generation Section ===
     st.markdown("### Generate New Report")
     symptoms = st.text_area("Patient Symptoms", "")
 
@@ -41,6 +39,7 @@ def show_doctor_ui(doctor_name: str):
         edited_text = st.text_area(
             "Generated Report",
             value=st.session_state.draft_report_text,
+            #value=st.session_state.draft_report_text.replace("**", ""),
             height=400,
             key="edit_report_text"
         )
@@ -48,7 +47,7 @@ def show_doctor_ui(doctor_name: str):
         if st.button("Save Report"):
             patient = st.session_state.draft_patient
             doctor = st.session_state.draft_doctor
-            final_text = edited_text
+            final_text = f"**Saved by {doctor}**\n\n" + edited_text  # Optional tag
 
             if patient not in st.session_state.reports:
                 st.session_state.reports[patient] = []
@@ -70,24 +69,38 @@ def show_doctor_ui(doctor_name: str):
             st.success("Report saved successfully.")
             st.rerun()
 
-    # === Past Reports (Only by Current Doctor) ===
+    # === Past Reports Section ===
     st.markdown("### Your Past Reports for This Patient")
     reports = st.session_state.reports.get(patient_name, [])
     own_reports = [r for r in reports if r["doctor"] == doctor_name]
 
     if not own_reports:
-        st.info("You haven't written any reports for this patient yet.")
+        st.info("No reports found.")
     else:
         for idx, rep in enumerate(own_reports):
-            st.markdown(f"**Report {idx + 1} by You**")
-            st.markdown(rep["report"])
+            st.markdown(rep["report"])  # display as markdown
             if rep["feedback"]:
                 st.markdown("**Feedback from Patient:**")
                 for fb in rep["feedback"]:
                     st.markdown(f"- {fb}")
             else:
-                st.markdown("_No feedback for this report._")
-            st.write("---")
+                st.markdown("_No feedback yet._")
+
+            # Edit/Delete options
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                if st.button(f"Edit Report {idx+1}"):
+                    st.session_state.draft_report_text = rep["report"]
+                    st.session_state.draft_patient = patient_name
+                    st.session_state.draft_doctor = doctor_name
+                    st.session_state.reports[patient_name].remove(rep)
+                    st.rerun()
+            with col2:
+                if st.button(f"Delete Report {idx+1}"):
+                    st.session_state.reports[patient_name].remove(rep)
+                    st.success("Report deleted.")
+                    st.rerun()
+            st.markdown("---")
 
 
 
@@ -102,7 +115,8 @@ def show_patient_ui(patient_name: str):
         safe_patient = patient_name.replace(' ', '_')
         for idx, rep in enumerate(reports):
             st.markdown(f"**Report {idx+1} – Doctor: {rep['doctor']}**")
-            st.text_area(f"Report {idx+1}", value=rep['report'], height=450, key=f"patient_report_{safe_patient}_{idx}", disabled=True)
+            # st.text_area(f"Report {idx+1}", value=rep['report'], height=450, key=f"patient_report_{safe_patient}_{idx}", disabled=True)
+            st.markdown(rep["report"])
             if rep['feedback']:
                 st.markdown("**Your Feedback:**")
                 for fb in rep['feedback']:
@@ -137,12 +151,13 @@ def show_admin_ui():
                 safe_patient = patient.replace(' ', '_')
                 for idx, rep in enumerate(rep_list):
                     st.markdown(f"- Report {idx+1} by **{rep['doctor']}**:")
-                    st.text_area(
-                        f"admin_report_{safe_patient}_{idx}",
-                        value=rep['report'],
-                        height=100,
-                        disabled=True
-                    )
+                    # st.text_area(
+                    #     f"admin_report_{safe_patient}_{idx}",
+                    #     value=rep['report'],
+                    #     height=400,
+                    #     disabled=True
+                    # )
+                    st.markdown(rep["report"])
                     if rep['feedback']:
                         st.markdown(f"➡ Feedback: {', '.join(rep['feedback'])}")
                     else:
